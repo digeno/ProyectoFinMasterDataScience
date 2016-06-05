@@ -1,7 +1,4 @@
-# ProyectoFinMasterDataScience
+# Proyecto Fin de Master KSchool DataScience 2015-2016
 
-Descomprimir fichero de datos .gz
-Ejecutar con ipython notebook el fichero .ipynb. Este script genera un .csv a partir del cual el proceso continua.
-
-Se visualiza un histograma de overall global a partir de las reviews
-utiliza librerías como textblob, nltk para lematización y stopwords para generar un dataframe con una nueva columna reviewTextLemmatized.
+Autores: Jose Antonio Albares Alberca y David Igeño Rodriguez.
+Objetivo:  Detector de eventos geoposicionados para agencias de noticias.
