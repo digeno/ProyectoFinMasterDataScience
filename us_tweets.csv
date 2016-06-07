@@ -1,4 +1,4 @@
-"","id","created_at","geo","city","review_clean"
+"","id","created_at","geo","city","text_clean"
 "0","737913052050423808","Wed Jun 01 07:45:56 +0000 2016","[37.8646149, -122.2341905]","Oakland, CA","supplemental health care healthcare job occupational therapist berkeley ca httpstcoxemgcbuus1 job httpstco7th6sitkki"
 "1","737913053119959040","Wed Jun 01 07:45:56 +0000 2016","[34.0522342, -118.2436849]","Los Angeles, CA","recommend anyone nursing job httpstcoskx3eguifz losangeles ca hiring httpstcookteli9l2f"
 "2","737913055338713089","Wed Jun 01 07:45:56 +0000 2016","[37.69944509, -123.01210475]","California, USA","httpstcodzvgumv8zq"
