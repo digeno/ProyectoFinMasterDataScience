@@ -40,6 +40,11 @@
         svg {
             background-color: #BABABF;
         }
+
+        circle {
+            fill: none;
+            stroke: #525454;
+        }
     </style>
 </head>
 <body>
@@ -151,7 +156,7 @@
                   })
                   .attr("r", function(d) {
                       //radio dinamico segun el score del sentimiento
-                      return 25 * Math.abs(d.predicted_sentiment);
+                      return 50 * Math.abs(d.predicted_sentiment);
                   })
                   .style("fill", "rgb(23,226,77)")
                   .style("opacity", .9)
@@ -214,7 +219,7 @@
                   })
                   .attr("r", function(d) {
                       //radio dinamico segun el score del sentimiento
-                      return 25 * Math.abs(d.predicted_sentiment);
+                      return 50 * Math.abs(d.predicted_sentiment);
                   })
                   .style("fill", "rgb(255,99,71)")
                   .style("opacity",.8)
