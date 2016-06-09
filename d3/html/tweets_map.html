@@ -14,9 +14,9 @@
         /* Style for Custom Tooltip */
         div.tooltip {
             position: absolute;
-            text-align: center;
+            text-align: left;
             width: 260px;
-            height: 55px;
+            height: 85px;
             padding: 2px;
             font: 12px sans-serif;
             background: white;
@@ -158,14 +158,20 @@
 
                   // Modification of custom tooltip code provided by Malcolm Maclean, "D3 Tips and Tricks"
                   // http://www.d3noob.org/2013/01/adding-tooltips-to-d3js-graph.html
-                  .on("mouseover", function(d) {
-                      div.transition()
-                              .duration(200)
-                              .style("opacity", .9);
-                      div.html(d.tweet_text)
-                              .style("left", (d3.event.pageX + 20) + "px")
-                              .style("top", (d3.event.pageY - 28) + "px");
-                  })
+                    .on("mouseover", function(d) {
+                        div.transition()
+                                .duration(200)
+                                .style("opacity", .9);
+
+                        div.html(d.tweet_text + '<br/><br/><a href= "http://maps.google.com/?q=' +
+                                d.tweet_geo_lat + ',' +
+                                d.tweet_geo_lon + '">(' + // The first <a> tag
+                                d.tweet_city +
+                                ")</a>")// closing </a> tag)
+                                .style("left", (d3.event.pageX + 20) + "px")
+                                .style("top", (d3.event.pageY - 28) + "px");
+
+                    })
 
                   // fade out tooltip on mouse out
 /*                  .on("mouseout", function(d) {
@@ -174,6 +180,9 @@
                               .style("opacity", 0);
                   })*/
                     ;
+
+
+          /*
           svg.selectAll(".place-pos-label")
                   .data(tweets)
                   .enter()
@@ -184,6 +193,7 @@
                   .attr("dy", "1.5em")
                   .style("opacity",.8)
                   .text(function(d) { return d.tweet_city; });
+          */
       });
 
       // cities of negative tweets
@@ -211,14 +221,19 @@
 
                   // Modification of custom tooltip code provided by Malcolm Maclean, "D3 Tips and Tricks"
                   // http://www.d3noob.org/2013/01/adding-tooltips-to-d3js-graph.html
+                  //http://www.d3noob.org/2014/05/including-html-link-in-d3js-tool-tip.html
                   .on("mouseover", function(d) {
                       div.transition()
                               .duration(200)
                               .style("opacity", .9);
-                      div.html(d.tweet_text)
+
+                      div.html(d.tweet_text + '<br/><br/><a href= "http://maps.google.com/?q=' +
+                              d.tweet_geo_lat + ',' +
+                              d.tweet_geo_lon + '">(' + // The first <a> tag
+                              d.tweet_city +
+                              ")</a>")// closing </a> tag)
                               .style("left", (d3.event.pageX + 20) + "px")
                               .style("top", (d3.event.pageY - 28) + "px");
-
                   })
 
                   // fade out tooltip on mouse out
@@ -228,7 +243,7 @@
                               .style("opacity", 0);
                   })*/
                     ;
-
+          /*
           svg.selectAll(".place-neg-label")
                   .data(tweets)
                   .enter()
@@ -239,6 +254,7 @@
                   .attr("dy", "1.5em")
                   .style("opacity",.8)
                   .text(function(d) { return d.tweet_city; });
+           */
       });
   });
 
