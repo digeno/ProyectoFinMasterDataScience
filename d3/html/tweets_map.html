@@ -34,7 +34,7 @@
         /* Legend Position Style */
         .legend {
             position:absolute;
-            left:550px;
+            left:600px;
             top:25px;
         }
         svg {
@@ -44,12 +44,12 @@
         circle {
             fill: none;
             stroke: #525454;
+            stroke-width: 1;
         }
     </style>
 </head>
 <body>
 <script type="text/javascript">
-
     /*
 
      http://bl.ocks.org/michellechandra/0b2ce4923dc9b5809922
@@ -98,9 +98,32 @@
             .append("div")
             .attr("class", "tooltip")
             .style("opacity", 0);
-    // Load in my states data!
 
+    function pulseOn(tweetId) {
+        var circle = svg.select(tweetId);
+        (function repeat() {
+            circle = circle.transition()
+                    .duration(500)
+                    .attr("stroke-width", 10)
+                    .attr("r", 5)
+                    .transition()
+                    .duration(2000)
+                    .attr('stroke-width', 1)
+                    .attr("r", 40)
+                    .ease('sine')
+                    .each("end", repeat);
+        })();
+    }
 
+    function pulseOff(tweetId, radio) {
+        var circle = svg.select(tweetId);
+        circle = circle.transition()
+                .duration(500)
+                .attr("r", radio)
+                .attr("fill", "none")
+                .attr("stroke", "#525454")
+                .style("stroke-width", "1");
+    }
 // Load GeoJSON data and merge with cities-lived data
   d3.json("../maps/us-states.json", function(json) {
 
@@ -148,7 +171,10 @@
                   .enter()
                   .append("circle")
                   .attr("class", "positiveCircle")
-                  .attr("cx", function(d) {
+                    .attr("id", function(d){
+                        return ("circle_" + d.tweet_id);        // slug = label downcased, this works
+                    })
+                    .attr("cx", function(d) {
                       return projection([d.tweet_geo_lon, d.tweet_geo_lat])[0];
                   })
                   .attr("cy", function(d) {
@@ -159,7 +185,7 @@
                       return 50 * Math.abs(d.predicted_sentiment);
                   })
                   .style("fill", "rgb(23,226,77)")
-                  .style("opacity", .9)
+                  .style("opacity", .5)
 
                   // Modification of custom tooltip code provided by Malcolm Maclean, "D3 Tips and Tricks"
                   // http://www.d3noob.org/2013/01/adding-tooltips-to-d3js-graph.html
@@ -175,7 +201,7 @@
                                 ")</a>")// closing </a> tag)
                                 .style("left", (d3.event.pageX + 20) + "px")
                                 .style("top", (d3.event.pageY - 28) + "px");
-
+                        pulseOn("#circle_" + d.tweet_id);
                     })
 
                   // fade out tooltip on mouse out
@@ -184,6 +210,9 @@
                               .duration(500)
                               .style("opacity", 0);
                   })*/
+                    .on("mouseout", function(d) {
+                        pulseOff("#circle_" + d.tweet_id, 50 * Math.abs(d.predicted_sentiment));
+                    })
                     ;
 
 
@@ -211,6 +240,9 @@
                   .enter()
                   .append("circle")
                   .attr("class", "negativeCircle")
+                  .attr("id", function(d){
+                      return ("circle_" + d.tweet_id);        // slug = label downcased, this works
+                  })
                   .attr("cx", function(d) {
                       return projection([d.tweet_geo_lon, d.tweet_geo_lat])[0];
                   })
@@ -239,6 +271,8 @@
                               ")</a>")// closing </a> tag)
                               .style("left", (d3.event.pageX + 20) + "px")
                               .style("top", (d3.event.pageY - 28) + "px");
+
+                      pulseOn("#circle_" + d.tweet_id);
                   })
 
                   // fade out tooltip on mouse out
@@ -247,7 +281,10 @@
                               .duration(500)
                               .style("opacity", 0);
                   })*/
-                    ;
+                  .on("mouseout", function(d) {
+                      pulseOff("#circle_" + d.tweet_id, 50 * Math.abs(d.predicted_sentiment));
+                  })
+          ;
           /*
           svg.selectAll(".place-neg-label")
                   .data(tweets)
