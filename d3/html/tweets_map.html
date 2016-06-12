@@ -35,7 +35,7 @@
         .legend {
             position:absolute;
             left:600px;
-            top:25px;
+            top:28px;
         }
         svg {
             background-color: #BABABF;
@@ -49,23 +49,19 @@
     </style>
 </head>
 <body>
+
+<div id="option" align="center">
+    <select onChange="renderSelectedPoints(this);">
+        <option disabled selected value> -- select an option -- </option>
+        <option value="1">Flight Tweets</option>
+        <option value="2">Cars Tweets</option>
+    </select>
+</div>
+
 <script type="text/javascript">
-    /*
 
-     http://bl.ocks.org/michellechandra/0b2ce4923dc9b5809922
-     http://bl.ocks.org/michellechandra/raw/0b2ce4923dc9b5809922/
-
-     This visualization was made possible by modifying code provided by:
-
-     Scott Murray, Choropleth example from "Interactive Data Visualization for the Web"
-     https://github.com/alignedleft/d3-book/blob/master/chapter_12/05_choropleth.html
-
-     Malcolm Maclean, tooltips example tutorial
-     http://www.d3noob.org/2013/01/adding-tooltips-to-d3js-graph.html
-
-     Mike Bostock, Pie Chart Legend
-     http://bl.ocks.org/mbostock/3888852  */
-
+    //Path of data
+    var dataFilePath = "../data/";
 
     //Width and height of map
     var width = 1200;
@@ -99,6 +95,8 @@
             .attr("class", "tooltip")
             .style("opacity", 0);
 
+
+
     function pulseOn(tweetId) {
         var circle = svg.select(tweetId);
         (function repeat() {
@@ -124,6 +122,80 @@
                 .attr("stroke", "#525454")
                 .style("stroke-width", "1");
     }
+
+    function showData(jsonData, circleColor, className) {
+        d3.json(dataFilePath + jsonData, function(error, data) {
+            if (error) return console.warn(error);
+            var tweets = data;
+
+            svg.selectAll(className)
+                    .data(tweets)
+                    .enter()
+                    .append("circle")
+                    .attr("class", className)
+                    .attr("id", function(d){
+                        return ("circle_" + d.tweet_id);        // slug = label downcased, this works
+                    })
+                    .attr("cx", function(d) {
+                        return projection([d.tweet_geo_lon, d.tweet_geo_lat])[0];
+                    })
+                    .attr("cy", function(d) {
+                        return projection([d.tweet_geo_lon, d.tweet_geo_lat])[1];
+                    })
+                    .attr("r", function(d) {
+                        //radio dinamico segun el score del sentimiento
+                        return 50 * Math.abs(d.predicted_sentiment);
+                    })
+                    .style("fill", circleColor)
+                    .style("opacity",.8)
+                    .on("mouseover", function(d) {
+                        div.transition()
+                                .duration(200)
+                                .style("opacity", .9);
+
+                        div.html(d.tweet_text + '<br/><br/><a target="_blank" href= "http://maps.google.com/?q=' +
+                                d.tweet_geo_lat + ',' +
+                                d.tweet_geo_lon + '">(' + // The first <a> tag
+                                d.tweet_city +
+                                ")</a>")// closing </a> tag)
+                                .style("left", (d3.event.pageX + 20) + "px")
+                                .style("top", (d3.event.pageY - 28) + "px");
+
+                        pulseOn("#circle_" + d.tweet_id);
+                    })
+
+
+                    .on("mouseout", function(d) {
+                        pulseOff("#circle_" + d.tweet_id, 50 * Math.abs(d.predicted_sentiment));
+                    })
+            ;
+
+        });
+    }
+
+    function renderData(json1, json2) {
+        // cities of most positive tweets
+        showData(json1, "rgb(23,226,77)", "positiveCircle");
+
+        // cities of most negative tweets
+        showData(json2, "rgb(255,99,71)", "negativeCircle");
+    }
+
+
+    function renderSelectedPoints(selectId) {
+
+        switch (parseInt(selectId.value)) {
+            case 1:
+                renderData('USA-flight-tweets-positive.json', 'USA-flight-tweets-negative.json');
+                break;
+            case 2:
+                renderData('USA-car-tweets-positive.json', 'USA-car-tweets-negative.json');
+                break;
+            default:
+                console.warn("error");
+        }
+    }
+
 // Load GeoJSON data and merge with cities-lived data
   d3.json("../maps/us-states.json", function(json) {
 
@@ -137,170 +209,30 @@
                     .style("stroke-width", "1")
                     .style("fill", "rgb(213,222,217)");
 
-            // Modified Legend Code from Mike Bostock: http://bl.ocks.org/mbostock/3888852
-            var legend = d3.select("body").append("svg")
-                    .attr("class", "legend")
-                    .attr("width", 140)
-                    .attr("height", 50)
-                    .selectAll("g")
-                    .data(color.domain().slice())
-                    .enter()
-                    .append("g")
-                    .attr("transform", function(d, i) { return "translate(0," + i * 20 + ")"; });
-
-            legend.append("rect")
-                    .attr("width", 18)
-                    .attr("height", 18)
-                    .style("fill", color);
-
-            legend.append("text")
-                    .data(legendText)
-                    .attr("x", 24)
-                    .attr("y", 9)
-                    .attr("dy", ".35em")
-                    .text(function(d) { return d; });
-
-      //http://www.w3schools.com/svg
-      // cities of positive tweets
-      d3.json("../data/USA-positive.json", function(error, data) {
-          if (error) return console.warn(error);
-          var tweets = data;
-
-            svg.selectAll("positiveCircle")
-                  .data(tweets)
-                  .enter()
-                  .append("circle")
-                  .attr("class", "positiveCircle")
-                    .attr("id", function(d){
-                        return ("circle_" + d.tweet_id);        // slug = label downcased, this works
-                    })
-                    .attr("cx", function(d) {
-                      return projection([d.tweet_geo_lon, d.tweet_geo_lat])[0];
-                  })
-                  .attr("cy", function(d) {
-                      return projection([d.tweet_geo_lon, d.tweet_geo_lat])[1];
-                  })
-                  .attr("r", function(d) {
-                      //radio dinamico segun el score del sentimiento
-                      return 50 * Math.abs(d.predicted_sentiment);
-                  })
-                  .style("fill", "rgb(23,226,77)")
-                  .style("opacity", .5)
-
-                  // Modification of custom tooltip code provided by Malcolm Maclean, "D3 Tips and Tricks"
-                  // http://www.d3noob.org/2013/01/adding-tooltips-to-d3js-graph.html
-                    .on("mouseover", function(d) {
-                        div.transition()
-                                .duration(200)
-                                .style("opacity", .9);
-
-                        div.html(d.tweet_text + '<br/><br/><a target="_blank" href= "http://maps.google.com/?q=' +
-                                d.tweet_geo_lat + ',' +
-                                d.tweet_geo_lon + '">(' + // The first <a> tag
-                                d.tweet_city +
-                                ")</a>")// closing </a> tag)
-                                .style("left", (d3.event.pageX + 20) + "px")
-                                .style("top", (d3.event.pageY - 28) + "px");
-                        pulseOn("#circle_" + d.tweet_id);
-                    })
-
-                  // fade out tooltip on mouse out
-/*                  .on("mouseout", function(d) {
-                      div.transition()
-                              .duration(500)
-                              .style("opacity", 0);
-                  })*/
-                    .on("mouseout", function(d) {
-                        pulseOff("#circle_" + d.tweet_id, 50 * Math.abs(d.predicted_sentiment));
-                    })
-                    ;
-
-
-          /*
-          svg.selectAll(".place-pos-label")
-                  .data(tweets)
-                  .enter()
-                  .append("text")
-                  .attr("class", ".place-pos-label")
-                  .attr("transform", function(d) { return "translate(" + projection([d.tweet_geo_lon, d.tweet_geo_lat])  + ")"; })
-                  .attr("dx", "-2em")
-                  .attr("dy", "1.5em")
-                  .style("opacity",.8)
-                  .text(function(d) { return d.tweet_city; });
-          */
-      });
-
-      // cities of negative tweets
-      d3.json("../data/USA-negative.json", function(error, data) {
-          if (error) return console.warn(error);
-          var tweets = data;
-
-          svg.selectAll("negativeCircle")
-                  .data(tweets)
-                  .enter()
-                  .append("circle")
-                  .attr("class", "negativeCircle")
-                  .attr("id", function(d){
-                      return ("circle_" + d.tweet_id);        // slug = label downcased, this works
-                  })
-                  .attr("cx", function(d) {
-                      return projection([d.tweet_geo_lon, d.tweet_geo_lat])[0];
-                  })
-                  .attr("cy", function(d) {
-                      return projection([d.tweet_geo_lon, d.tweet_geo_lat])[1];
-                  })
-                  .attr("r", function(d) {
-                      //radio dinamico segun el score del sentimiento
-                      return 50 * Math.abs(d.predicted_sentiment);
-                  })
-                  .style("fill", "rgb(255,99,71)")
-                  .style("opacity",.8)
-
-                  // Modification of custom tooltip code provided by Malcolm Maclean, "D3 Tips and Tricks"
-                  // http://www.d3noob.org/2013/01/adding-tooltips-to-d3js-graph.html
-                  //http://www.d3noob.org/2014/05/including-html-link-in-d3js-tool-tip.html
-                  .on("mouseover", function(d) {
-                      div.transition()
-                              .duration(200)
-                              .style("opacity", .9);
-
-                      div.html(d.tweet_text + '<br/><br/><a target="_blank" href= "http://maps.google.com/?q=' +
-                              d.tweet_geo_lat + ',' +
-                              d.tweet_geo_lon + '">(' + // The first <a> tag
-                              d.tweet_city +
-                              ")</a>")// closing </a> tag)
-                              .style("left", (d3.event.pageX + 20) + "px")
-                              .style("top", (d3.event.pageY - 28) + "px");
-
-                      pulseOn("#circle_" + d.tweet_id);
-                  })
-
-                  // fade out tooltip on mouse out
-/*                  .on("mouseout", function(d) {
-                      div.transition()
-                              .duration(500)
-                              .style("opacity", 0);
-                  })*/
-                  .on("mouseout", function(d) {
-                      pulseOff("#circle_" + d.tweet_id, 50 * Math.abs(d.predicted_sentiment));
-                  })
-          ;
-          /*
-          svg.selectAll(".place-neg-label")
-                  .data(tweets)
-                  .enter()
-                  .append("text")
-                  .attr("class", ".place-neg-label")
-                  .attr("transform", function(d) { return "translate(" + projection([d.tweet_geo_lon, d.tweet_geo_lat])  + ")"; })
-                  .attr("dx", "-2em")
-                  .attr("dy", "1.5em")
-                  .style("opacity",.8)
-                  .text(function(d) { return d.tweet_city; });
-           */
-      });
   });
 
+    // Show a Legend
+    var legend = d3.select("body").append("svg")
+            .attr("class", "legend")
+            .attr("width", 140)
+            .attr("height", 50)
+            .selectAll("g")
+            .data(color.domain().slice())
+            .enter()
+            .append("g")
+            .attr("transform", function(d, i) { return "translate(0," + i * 20 + ")"; });
 
+    legend.append("rect")
+            .attr("width", 18)
+            .attr("height", 18)
+            .style("fill", color);
+
+    legend.append("text")
+            .data(legendText)
+            .attr("x", 24)
+            .attr("y", 9)
+            .attr("dy", ".35em")
+            .text(function(d) { return d; });
 
 </script>
 </body>
