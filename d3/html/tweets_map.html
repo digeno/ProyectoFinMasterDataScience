@@ -144,7 +144,7 @@
                     })
                     .attr("r", function(d) {
                         //radio dinamico segun el score del sentimiento
-                        return 100 * Math.abs(d.predicted_sentiment);
+                        return 50 * Math.abs(d.predicted_sentiment);
                     })
                     .style("fill", circleColor)
                     .style("opacity",.8)
