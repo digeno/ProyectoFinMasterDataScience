@@ -35,7 +35,7 @@
         .legend {
             position:absolute;
             left:600px;
-            top:28px;
+            top:30px;
         }
         svg {
             background-color: #BABABF;
@@ -134,7 +134,7 @@
                     .append("circle")
                     .attr("class", className)
                     .attr("id", function(d){
-                        return ("circle_" + d.tweet_id);        // slug = label downcased, this works
+                        return ("circle_" + d.tweet_id);
                     })
                     .attr("cx", function(d) {
                         return projection([d.tweet_geo_lon, d.tweet_geo_lat])[0];
@@ -144,7 +144,7 @@
                     })
                     .attr("r", function(d) {
                         //radio dinamico segun el score del sentimiento
-                        return 50 * Math.abs(d.predicted_sentiment);
+                        return 100 * Math.abs(d.predicted_sentiment);
                     })
                     .style("fill", circleColor)
                     .style("opacity",.8)
@@ -166,7 +166,7 @@
 
 
                     .on("mouseout", function(d) {
-                        pulseOff("#circle_" + d.tweet_id, 50 * Math.abs(d.predicted_sentiment));
+                        pulseOff("#circle_" + d.tweet_id, 100 * Math.abs(d.predicted_sentiment));
                     })
             ;
 
@@ -182,13 +182,20 @@
     }
 
 
+    function cleanData() {
+        svg.selectAll(".positiveCircle").remove();
+        svg.selectAll(".negativeCircle").remove();
+    }
+
     function renderSelectedPoints(selectId) {
 
         switch (parseInt(selectId.value)) {
             case 1:
+                cleanData();
                 renderData('USA-flight-tweets-positive.json', 'USA-flight-tweets-negative.json');
                 break;
             case 2:
+                cleanData();
                 renderData('USA-car-tweets-positive.json', 'USA-car-tweets-negative.json');
                 break;
             default:
